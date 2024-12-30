@@ -2,7 +2,15 @@ Chat App for Sailer AI Front End Developer Position.
 
 ## Getting Started
 
-First, run the development server:
+First, install the packages:
+
+```bash
+npm i
+# or
+yarn
+```
+
+Then, start the server
 
 ```bash
 npm run dev
