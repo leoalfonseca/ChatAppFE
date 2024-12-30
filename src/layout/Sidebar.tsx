@@ -1,84 +1,143 @@
-import { Box, Drawer, List, ListItem } from "@mui/material";
+import {
+  Box,
+  Drawer,
+  List,
+  ListItem,
+  Typography,
+  IconButton,
+  Stack,
+  ListItemAvatar,
+  Avatar,
+  Badge,
+  ListItemText,
+  ListItemButton,
+  Divider,
+} from "@mui/material";
 import { useState } from "react";
+import { IconMessageCirclePlus, IconUsersGroup } from "@tabler/icons-react";
+import NewChatModal from "@/components/NewChatModal";
 
 const drawerWidth = 240;
 
 interface Props {
-  window?: () => Window;
   chats: any[];
   setSelectedChat: (chatId: string) => void;
+  selectedChat: string | null;
+  setShouldFetchChats: (value: boolean) => void;
 }
 
-const Sidebar = ({window, chats, setSelectedChat}: Props) => {
-  const [isClosing, setIsClosing] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+const Sidebar = ({
+  chats,
+  setSelectedChat,
+  setShouldFetchChats,
+  selectedChat,
+}: Props) => {
+  const [open, setOpen] = useState(false);
+  const [type, setType] = useState<string>("");
 
-  const handleDrawerClose = () => {
-    setIsClosing(true);
-    setMobileOpen(false);
+  const handleOpen = (type: string) => {
+    setType(type);
+    setOpen(true);
   };
-
-  const handleDrawerTransitionEnd = () => {
-    setIsClosing(false);
-  };
-
-  const container =
-    window !== undefined ? () => window().document.body : undefined;
 
   const drawer = (
-    <div>
-      <List>
-         {chats &&
+    <>
+      <List sx={{ overflowY: "auto", height: "calc(100vh - 64px)" }}>
+        {chats &&
           chats.map((chat) => (
-            <ListItem
-              key={chat.chat_id}
-              onClick={() => setSelectedChat(chat.chat_id)}
-            >
-              Chat with {chat.participants.join(", ")}
-            </ListItem>
+            <>
+              <ListItemButton
+                key={chat.chat_id}
+                onClick={() => setSelectedChat(chat.chat_id)}
+                selected={chat.chat_id === selectedChat}
+              >
+                <ListItemAvatar>
+                  <Badge color="primary" variant="dot" invisible={!chat.unread}>
+                    {chat.participants.length > 2 ? (
+                      <Avatar>
+                        <IconUsersGroup />
+                      </Avatar>
+                    ) : (
+                      <Avatar src="/profile/botUser.jpg" />
+                    )}
+                  </Badge>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={chat.participants.join(", ")}
+                  sx={{ color: "#b5c6d1" }}
+                />
+              </ListItemButton>
+              <Divider sx={{ backgroundColor: "#2A3942" }} />
+            </>
           ))}
       </List>
-    </div>
+    </>
   );
   return (
-    <Box
-      component="nav"
-      sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-      aria-label="mailbox folders"
-    >
-      <Drawer
-        container={container}
-        variant="temporary"
-        open={mobileOpen}
-        onTransitionEnd={handleDrawerTransitionEnd}
-        onClose={handleDrawerClose}
-        ModalProps={{
-          keepMounted: true,
-        }}
-        sx={{
-          display: { xs: "block", sm: "none" },
-          "& .MuiDrawer-paper": {
-            boxSizing: "border-box",
-            width: drawerWidth,
-          },
-        }}
+    <>
+      <Box
+        component="nav"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        aria-label="mailbox folders"
       >
-        {drawer}
-      </Drawer>
-      <Drawer
-        variant="permanent"
-        sx={{
-          display: { xs: "none", sm: "block" },
-          "& .MuiDrawer-paper": {
-            boxSizing: "border-box",
-            width: drawerWidth,
-          },
-        }}
-        open
-      >
-        {drawer}
-      </Drawer>
-    </Box>
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: "none", sm: "block" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+              backgroundColor: "#111B21",
+            },
+          }}
+          open
+        >
+          <Stack
+            direction={"row"}
+            spacing={4}
+            sx={{ width: drawerWidth, height: "64px" }}
+          >
+            <Stack>
+              <Typography
+                variant="h6"
+                noWrap
+                sx={{
+                  color: "white",
+                  textAlign: "left",
+                  lineHeight: "40px",
+                  pl: 2,
+                  pt: 1.5,
+                }}
+              >
+                Conversas{" "}
+              </Typography>
+            </Stack>
+            <Stack direction={"row"} spacing={1}>
+              <IconButton
+                onClick={() => handleOpen("single")}
+                sx={{ color: "white" }}
+              >
+                <IconMessageCirclePlus />
+              </IconButton>
+              <IconButton
+                onClick={() => handleOpen("group")}
+                sx={{ color: "white" }}
+              >
+                <IconUsersGroup />
+              </IconButton>
+            </Stack>
+          </Stack>
+          {drawer}
+        </Drawer>
+      </Box>
+      <NewChatModal
+        open={open}
+        onClose={() => setOpen(false)}
+        onCreateChat={() => {}}
+        setShouldFetchChats={setShouldFetchChats}
+        type={type}
+      />
+    </>
   );
 };
 export default Sidebar;

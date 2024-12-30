@@ -1,43 +1,50 @@
-import { AppBar, Toolbar, IconButton, Typography } from "@mui/material";
-import React from "react";
-import MenuIcon from "@mui/icons-material/Menu";
+import useChatWebSocket from "@/hooks/useChatWebSocket";
+import { AppBar, Toolbar, Typography, Box, Avatar, Stack } from "@mui/material";
+import { useState } from "react";
 
 const drawerWidth = 240;
 
-const Header = () => {
+interface Props {
+  chats: any[];
+  selectedChat: string | null;
+}
 
-  const [isClosing, setIsClosing] = React.useState(false);
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+const Header = ({ chats, selectedChat }: Props) => {
+  const [status, setStatus] = useState<string | null>("offline");
 
-   const handleDrawerToggle = () => {
-    if (!isClosing) {
-      setMobileOpen(!mobileOpen);
-    }
-  };
+  useChatWebSocket(selectedChat, undefined, setStatus, undefined, undefined);
 
   return (
     <AppBar
       position="fixed"
       sx={{
-        width: { sm: `100% - ${drawerWidth}px)` },
+        width: { sm: `calc(100% - ${drawerWidth}px)` },
         ml: { sm: `${drawerWidth}px` },
+        height: "70px",
+        backgroundColor: "#202C33",
       }}
     >
       <Toolbar>
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={handleDrawerToggle}
-          sx={{ mr: 2, display: { sm: "none" } }}
-        >
-          <MenuIcon />
-        </IconButton>
-        <Typography variant="h6" noWrap component="div">
-          Chat App
-        </Typography>
+        <Box>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Avatar src="/profile/botUser.jpg" />
+            <Stack direction="column" spacing={0}>
+              <Typography variant="h6" noWrap>
+                {selectedChat
+                  ? chats
+                      .find((chat) => chat.chat_id === selectedChat)
+                      ?.participants.join(", ")
+                  : "Chat App"}
+              </Typography>
+              <Typography variant="subtitle2" color="#A6ADB0">
+                {status}
+              </Typography>
+            </Stack>
+          </Stack>
+        </Box>
       </Toolbar>
     </AppBar>
   );
 };
+
 export default Header;

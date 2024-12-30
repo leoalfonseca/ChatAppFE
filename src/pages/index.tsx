@@ -6,42 +6,66 @@ import { getChats } from "../services/api";
 import ChatBox from "../components/ChatBox";
 import Header from "@/layout/Header";
 import Sidebar from "@/layout/Sidebar";
-import Grid from "@mui/material/Grid2";
+import { CssBaseline } from "@mui/material";
 
 export default function ChatApp() {
   const [chats, setChats] = useState<any[]>([]);
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
+  const [shouldFetchChats, setShouldFetchChats] = useState<boolean>(true);
+
+  const fetchChats = async () => {
+    const fetchedChats = await getChats();
+    let fetchedChartsReverse = fetchedChats.reverse();
+    setChats(fetchedChartsReverse);
+  };
 
   useEffect(() => {
-    const fetchChats = async () => {
-      const fetchedChats = await getChats();
-      setChats(fetchedChats);
-    };
-
-    fetchChats();
-  }, []);
+    if (shouldFetchChats) {
+      fetchChats();
+      setShouldFetchChats(false);
+    }
+  }, [shouldFetchChats]);
 
   return (
-    <Grid container>
-      <Grid size={12}>
-        <Header />
-      </Grid>
-      <Grid size={4}>
-        <Sidebar chats={chats} setSelectedChat={setSelectedChat} />
-      </Grid>
-      <Grid size={8}>
+    <>
+      <CssBaseline />
+      <Box
+        sx={{
+          backgroundImage: `url('/chat_background/chatBackground.png')`,
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          backgroundAttachment: "fixed",
+          height: "100vh",
+          m: 0,
+          p: 0,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-start",
+          alignItems: "center",
+          overflow: "auto",
+        }}
+      >
+        <Header chats={chats} selectedChat={selectedChat} />
+        <Sidebar
+          chats={chats}
+          setSelectedChat={setSelectedChat}
+          setShouldFetchChats={setShouldFetchChats}
+          selectedChat={selectedChat}
+        />
         <Box
           component="main"
           sx={{
             flexGrow: 1,
-            p: 3,
-            width: { sm: `calc(100% - 240px)` },
+            width: `calc(100% - 300px)`,
+            pl: 35,
+            overflowY: "auto",
           }}
         >
           <Toolbar />
-          {selectedChat && <ChatBox chatId={selectedChat} />}
+          {selectedChat && <ChatBox chatId={selectedChat} chats={chats} />}
         </Box>
-      </Grid>
-    </Grid>
+      </Box>
+    </>
   );
 }
